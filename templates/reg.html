@@ -1,0 +1,182 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="x-ua-compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Title</title>
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.css' %}">
+    <link rel="stylesheet" href="{% static 'css/reg.css' %}">
+    <script src="{% static 'js/jquery-3.2.1.js' %}"></script>
+    <script src="{% static 'bootstrap/js/bootstrap.js' %}"></script>
+
+</head>
+<body>
+<div style="height: 50px"></div>
+<div class="container">
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+            <form>
+
+                {% csrf_token %}
+                <div class="form-group">
+
+                    <label for="id_username">用户名</label>
+                    {{ form_obj.username }} <span class="user_error error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="pwd">密码</label>
+                    {{ form_obj.password }} <span class="pwd_error error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="repeat_pwd">确认密码</label>
+                    {{ form_obj.repeat_password }} <span class="repeat_pwd_error error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">邮箱</label>
+                    {{ form_obj.email }} <span class="email_error error"></span>
+                </div>
+
+                <div class="form-group file_avatar">
+
+                    <label for="file_choose">头像</label>
+                    <img src="{% static 'img/default.png' %}" alt="" id="file_img" class="sol">
+                    <input type="file" id="file_choose" class="sol">
+
+                </div>
+
+
+                <div class="form-group">
+                    <label for="valid_code">验证码</label>
+                    <div class="row">
+                        <div class="col-md-6">
+                            {{ form_obj.valid_code }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <img src="/valid_code/" alt="" class="valid_img">
+                            <a class="refresh">刷新</a>
+
+                        </div>
+                        <div><span class="valid_code_error error"></span></div>
+
+
+                    </div>
+
+
+                    <div class="form-group">
+                        <div class="row">
+                            <div style="height: 20px"></div>
+                            <div class="col-md-6">
+                                <input type="button" value="注册" class="submit_reg btn btn-default btn-info">
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    // 验证码的刷新
+    $(".refresh").click(function () {
+
+        $(".valid_img")[0].src += "?"
+
+    });
+
+
+    $("#file_choose").change(function () {
+
+
+        var reader = new FileReader();
+
+        var first_file = $(this)[0].files[0];   // 上传文件对象
+
+        reader.readAsDataURL(first_file);
+
+
+        reader.onload = function () {
+
+            $("#file_img")[0].src = this.result
+        }
+
+
+    });
+
+
+    // ajax注册验证
+
+    $(".submit_reg").click(function () {
+        var username = $("#id_username").val();
+        var password = $("#id_password").val();
+        var repeat_password = $("#id_repeat_password").val();
+        var email = $("#id_email").val();
+        var valid_code = $("#id_valid_code").val();
+        var csrf = $("[name='csrfmiddlewaretoken']").val();
+        var formData = new FormData();
+        $(".error").text("");
+
+        formData.append("username", username);
+        formData.append("password", password);
+        formData.append("email", email);
+        formData.append("repeat_password", repeat_password);
+        formData.append("valid_code", valid_code);
+        formData.append("csrfmiddlewaretoken", csrf);
+
+        formData.append("img", $("#file_choose")[0].files[0]);
+        $.ajax({
+
+            url: "/reg/",
+            type: "POST",
+            processData: false,      // 使用formdata,processData,contentType必须设为false
+            contentType: false,
+            data: formData,
+
+            success: function (data) {
+                data = JSON.parse(data);
+                if (data["flag"]) {
+
+                    $(".valid_img")[0].src += "?";
+
+
+                    var $error = data["error"];
+
+
+                    $(".user_error").text($error["username"]).css({"color": "red", "margin-left": "20px"});
+
+                    $(".pwd_error").text($error["password"]).css({"color": "red", "margin-left": "20px"});
+
+                    $(".repeat_pwd_error").text($error["__all__"]).css({"color": "red", "margin-left": "20px"});
+
+                    $(".email_error").text($error["email"]).css({"color": "red", "margin-left": "20px"});
+
+                    $(".valid_code_error").text($error["valid_code"]).css({"color": "red", "margin-left": "40px"});
+
+
+
+                }
+                else {
+                    location.href = "/login/";
+                }
+
+
+            }
+
+        })
+
+    })
+
+
+</script>
+</body>
+</html>

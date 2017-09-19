@@ -1,0 +1,109 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.css' %}">
+    <script src="{% static 'js/jquery-3.2.1.js' %}"></script>
+    <script src="{% static 'bootstrap/js/bootstrap.js' %}"></script>
+
+    <style>
+
+        .container {
+            margin-top: 80px;
+        }
+
+        .valid_img {
+            width: 150px;
+            height: 40px;
+
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+            <form>
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="user">用户名</label>
+                    <input type="text" class="form-control" id="user" placeholder="username">
+                </div>
+
+                <div class="form-group">
+                    <label for="pwd">密码</label>
+                    <input type="password" class="form-control" id="pwd" placeholder="Password">
+                </div>
+
+                <div class="form-group">
+                    <label for="valid_code">验证码</label>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" id="valid_code" placeholder="valid_code"
+                                   name="valid">
+                        </div>
+
+                        <div class="col-md-6">
+                            <img src="/valid_code/" alt="" class="valid_img">
+                            <a class="refresh"><span>刷新</span></a>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="col-md-3">
+                    <input type="button" class="btn btn-default" id="take" value="登入">
+                    <p><span class="error" style="color: red"></span></p>
+                </div>
+                <div class="col-md-3">
+                    <a href="/reg/"><input type="button" value="注册" class="submit_login btn btn-default"></a>
+                </div>
+
+{#                <button type="submit" class="btn btn-default">Submit</button>#}
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $("#take").click(function () {
+        var user = $("#user").val();
+        var pwd = $('#pwd').val();
+        var valid_code = $("#valid_code").val();
+        var csrf = $("[name='csrfmiddlewaretoken']").val();
+
+        $.ajax({
+            url: "/login/",
+            type: "POST",
+            data: {
+                "username": user,
+                "password": pwd,
+                "valid_code": valid_code,
+                "csrfmiddlewaretoken":csrf
+            },
+            success: function (data) {
+                data = JSON.parse(data);
+                if (data["flag"]) {
+                    $(".valid_img")[0].src+="?";
+                    $(".error").text(data["error"]).css({"color": "red"});
+
+                }
+                else {
+
+                    location.href = "{{ re_url }}";
+                }
+            }
+        })
+    })
+
+    $(".refresh").click(function () {
+        $(".valid_img")[0].src+="?";
+
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,216 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="x-ua-compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.css' %}">
+    <script src="{% static 'js/jquery-3.2.1.js' %}"></script>
+    <script src="{% static 'bootstrap/js/bootstrap.js' %}"></script>
+    <title>index</title>
+    <style>
+        a {
+            text-decoration: none;
+        }
+
+        body {
+            font-size: 16px;
+
+        }
+
+        .img {
+            float: left;
+        }
+
+        .article_item {
+            margin-top: 20px;
+            border-bottom: 1px solid gray;
+        }
+
+    </style>
+
+</head>
+<body>
+<nav class="navbar navbar-inverse">
+    <div class="container">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                    data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">Brand</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+                {% for type_choice in func %}
+                    <li><a href="#">{{ type_choice.1 }}</a></li>
+                {% endfor %}
+
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+                       aria-expanded="false">Dropdown <span class="caret"></span></a>
+
+                    <ul class="dropdown-menu">
+                        <li><a href="#">Action</a></li>
+                        <li><a href="#">Another action</a></li>
+                        <li><a href="#">Something else here</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="#">Separated link</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="#">One more separated link</a></li>
+
+                    </ul>
+                </li>
+            </ul>
+
+
+            <ul class="nav navbar-nav navbar-right">
+                {% if request.user.is_authenticated %}
+                    <li><a href="/u/{{ request.user }}">你好: {{ request.user }}</a></li>
+                    <li><a href="/log_out/">登出</a></li>
+                    <li><a href="/re_pwd/">修改密码</a></li>
+                    <li><a href="/index/">Help</a></li>
+
+                {% else %}
+                    <li><a href="/login/">登录</a></li>
+                    <li><a href="/reg/">注册</a></li>
+
+                {% endif %}
+
+
+            </ul>
+        </div><!-- /.navbar-collapse -->
+    </div><!-- /.container-fluid -->
+</nav>
+
+
+<div class="container">
+
+    <div class="row">
+        <div class="col-md-2">
+            <div class="list-group">
+
+                {% if current_type_choices_id == 0 %}
+                    <a class="list-group-item active" href="#">ALL<span class="sr-only">(current)</span></a>
+                {% else %}
+                    <a class="list-group-item" href="#">ALL<span class="sr-only">(current)</span></a>
+
+                {% endif %}
+
+
+                {% for type_choice in type_choices %}
+
+                    {% if  current_type_choices_id == type_choice.0 %}
+                        <a class="list-group-item" href=/blog/{{ type_choice.0 }}">{{ type_choice.1 }}</a>
+
+                    {% else %}
+                        <a class="list-group-item" href="/blog/{{ type_choice.0 }}">{{ type_choice.1 }}</a>
+
+                    {% endif %}
+
+
+                {% endfor %}
+            </div>
+        </div>
+        <div class="col-md-7">
+            <div class="article_list">
+                {% for i in book_list %}
+                    <div class="article_item">
+                        <div class="row">
+                            <div class="title">
+                                <a href="/u/{{ i.blog.user.username }}/{{ i.nid }}/">{{ i.title }}</a>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="img"><a href="/u/{{ i.blog.user.username }}"><img height="80px" width="60px" src="{{ i.blog.user.avatar.url }}"></a></div>
+                            <div class="text">
+                                {{ i.desc }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="icon">
+                                <span><a href="/u/{{ i.blog.user.username }}">{{ i.blog.user.username }} </a> 发布于</span>
+                                <span class="timer"> {{ i.create_time|date:"Y-m-d" }}</span> &nbsp;&nbsp;
+                                <span class="glyphicon glyphicon-comment"></span>&nbsp;<a href="">评论{{ i.comment_count }}</a>
+                                <span class="glyphicon glyphicon-thumbs-up"></span>&nbsp;<a href="">赞{{ i.up_count }}</a>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                {% endfor %}
+
+
+                <ul class="pagination">
+                    {% if book_list.has_previous %}
+                        <li><a href="/index/?page={{ book_list.previous_page_number }}">上一页</a></li>
+                    {% else %}
+                        <li class="disabled"><a href="#">上一页</a></li>
+                    {% endif %}
+
+                    {% for num in p_obj.page_range %}
+                        <li><a href="/index/?page={{ num }}">{{ num }}</a></li>
+                    {% endfor %}
+
+                    {% if book_list.has_next %}
+                        <li><a href="/index/?page={{ book_list.next_page_number }}">下一页</a></li>
+                    {% else %}
+                        <li class="disabled"><a href="#">下一页</a></li>
+                    {% endif %}
+
+                </ul>
+
+
+            </div>
+
+
+        </div>
+        <div class="col-md-3">
+
+{#            <div class="panel panel-primary">#}
+{#                <div class="panel-heading">Panel heading without title</div>#}
+{#                <div class="panel-body">#}
+{#                    <p>111</p>#}
+{#                    <p>111</p>#}
+{#                    <p>111</p>#}
+{#                </div>#}
+{#            </div>#}
+            <div><object type="application/x-shockwave-flash" style="outline:none;" data="http://cdn.abowman.com/widgets/hamster/hamster.swf?up_wheelColor=FFFFFF&up_bgColor=FFFFFF&up_bodyColor=EB1515&up_earColor=D4C898&up_wheelOuterColor=FF4D4D&up_tailColor=E6DEBE&up_wheelCenterColor=E4EB2F&up_wheelSpokeColor=DEDEDE&up_waterColor=E0EFFF&up_foodColor=cba920&up_snoutColor=F7F4E9&up_eyeColor=000000&up_feetColor=D4C898&" width="300" height="225"><param name="movie" value="http://cdn.abowman.com/widgets/hamster/hamster.swf?up_wheelColor=FFFFFF&up_bgColor=FFFFFF&up_bodyColor=EB1515&up_earColor=D4C898&up_wheelOuterColor=FF4D4D&up_tailColor=E6DEBE&up_wheelCenterColor=E4EB2F&up_wheelSpokeColor=DEDEDE&up_waterColor=E0EFFF&up_foodColor=cba920&up_snoutColor=F7F4E9&up_eyeColor=000000&up_feetColor=D4C898&"></param><param name="AllowScriptAccess" value="always"></param><param name="wmode" value="opaque"></param></object></div>
+            <div style="height: 16px"></div>
+            <div class="panel panel-warning" style="width: 300px">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Panel title</h3>
+                </div>
+                <div class="panel-body">
+                    <p>111</p>
+                    <p>111</p>
+                    <p>111</p>
+                </div>
+            </div>
+
+
+            <div class="panel panel-info" style="width: 300px">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Panel title</h3>
+                </div>
+                <div class="panel-body">
+                    <p>111</p>
+                    <p>111</p>
+                    <p>111</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

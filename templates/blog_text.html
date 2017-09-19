@@ -1,0 +1,253 @@
+{% extends "blog_base.html" %}
+
+{% block con %}
+
+
+    <div class="article_content">
+        <div><a href=""><h3>{{ article_obj.title }}</h3></a></div>
+        <hr>
+        <div class="content">{{ articledetail_obj.content|safe }}</div>
+        <hr>
+        <div class="icon">
+            {% csrf_token %}
+            &nbsp;<a href="#comment_input">评论</a>
+            <a class="poll">赞 <span>{{ article_obj.up_count }}</span></a>
+
+            <span class="c1"></span>
+
+        </div>
+
+    </div>
+    <hr>
+    <h5>已有评论：</h5>
+
+
+    <ul class="list-group comment_list">
+        {% for coment in coment_list %}
+            <li class="list-group-item comment_item">
+                <a href="/u/{{ coment.user.username }}">{{ coment.user.username }}</a>
+                <a href="">{{ coment.create_time|date:"Y-m-d H:i" }}</a>
+                {% if coment.parent_id_id %}
+                    <div>@{{ coment.parent_id.user.username }} : {{ coment.parent_id.content }}</div>
+                    <div>
+
+                        {{ coment.content }}
+
+                    </div>
+                {% else %}
+                    <div>
+
+                        {{ coment.content }}
+
+                    </div>
+
+
+                {% endif %}
+
+                <hr>
+                <div class="coment_tag">
+                    <a href="#comment_input" class="coment_coment">评论</a>
+                    <a class="coment_poll">赞 <span>{{ coment.up_count }}</span></a>
+                    <span class="c2"></span>
+                    <span class="hide coment_nid ">{{ coment.nid }}</span>
+
+                </div>
+
+            </li>
+        {% endfor %}
+        <li class="list-group-item comment_item hide comment_base">
+            <a></a>
+            <a></a>
+            <div></div>
+            <hr>
+            <div>
+                <a href="#comment_input"></a>
+                <a class="coment_poll"> <span></span></a>
+                <span class="c2"></span>
+                <span class="hide"></span>
+
+            </div>
+        </li>
+
+
+    </ul>
+
+
+    <form action="">
+        <div>回复的人: <span class="partent_user"></span></div>
+        <textarea id="comment_content" cols="30" rows="10"></textarea>
+        <span class="comment_error"></span>
+
+        <p>
+            <input id="comment_input" type="button" value="评论" class="btn btn-primary ajax_comment">
+        </p>
+
+    </form>
+
+    <script>
+
+
+        var parent_id = "a";
+
+        var article_id = {{ article_obj.nid }};
+
+
+        $(".coment_coment").click(function () {
+            console.log(parent_id);
+            var conment_id = $(this).next().next().next().text();
+            console.log(conment_id);
+            var conment_user = $(this).parent().parent().children().eq(0).text();
+
+
+            parent_id = conment_id;
+
+            $(".partent_user").text("@" + conment_user);
+
+
+        });
+
+
+
+        $(".poll").click(function () {
+            {% if request.user.is_authenticated %}
+                $.ajax({
+                        url: "/blog/poll/",
+                        type: "POST",
+                        data: {
+                            "csrfmiddlewaretoken": $("[name='csrfmiddlewaretoken']").val(),
+                            "article_id": article_id
+
+                        },
+                        success: function (data) {
+
+                            data = JSON.parse(data);
+                            if (data["flag"]) {
+                                $(".poll").children("span").text(parseInt($(".poll").children("span").text()) + 1)
+                            }
+                            else {
+                                $(".poll").next(".c1").text("Uptoed！").css("color", "red");
+                                setTimeout(function () {
+                                    $(".poll").next(".c1").text("")
+                                }, 1000)
+                            }
+                        }
+                    }
+                );
+
+
+            {% else %}
+
+                location.href = "/login{{ request.path }}";
+
+            {% endif %}
+        });
+
+
+        $(".coment_poll").click(function () {
+            {% if request.user.is_authenticated %}
+                var coment_nid = $(this).next().next(".coment_nid").text();
+                var coment_poll = $(this);
+                $.ajax({
+                        url: "/blog/poll/",
+                        type: "POST",
+                        data: {
+                            "csrfmiddlewaretoken": $("[name='csrfmiddlewaretoken']").val(),
+                            "coment_nid": coment_nid
+
+                        },
+                        success: function (data) {
+
+                            data = JSON.parse(data);
+                            if (data["flag"]) {
+                                coment_poll.children("span").text(parseInt(coment_poll.children("span").text()) + 1)
+                            }
+                            else {
+                                coment_poll.next(".c2").text("Uptoed！").css("color", "red");
+                                setTimeout(function () {
+                                    coment_poll.next(".c2").text("")
+                                }, 1000)
+                            }
+                        }
+                    }
+                );
+            {% else %}
+                location.href = "/login{{ request.path }}";
+            {% endif %}
+        });
+
+        $(function () {
+            $(".ajax_comment").click(function () {
+                {% if request.user.is_authenticated %}
+                    $(".comment_error").text("");
+
+                    var comment_content = $(this).parent().prev().prev().val();
+                    console.log(comment_content);
+
+
+                    $.ajax({
+                        url: "/blog/comment/",
+                        type: "POST",
+                        data: {
+                            "csrfmiddlewaretoken": $("[name='csrfmiddlewaretoken']").val(),
+                            "article_id": article_id,
+                            "comment_content": comment_content,
+                            "parent_id": parent_id
+
+                        },
+
+                        success: function (data) {
+                            data = JSON.parse(data);
+                            if (data["flag"]) {
+                                var comment_obj = $(".comment_base").clone();
+
+                                comment_obj.children().eq(0).text(data["username"]).prop("href", "u/" + data["username"]);
+                                console.log(comment_obj.children().eq(0));
+                                comment_obj.children().eq(1).text(data["create_time"]);
+                                console.log(comment_obj.children().eq(1));
+                                comment_obj.children().eq(2).text(data["content"]);
+                                console.log(comment_obj.children().eq(2));
+                                comment_obj.children().eq(4).children().eq(0).text("评论");
+                                var span = $("<span>");
+                                span.text(0);
+                                comment_obj.children().eq(4).children().eq(1).text("赞").append(span);
+
+                                comment_obj.children().eq(4).children().eq(3).text(data["nid"]);
+
+                                if (data["parent_name"]) {
+
+                                    var parent_name = $("<div>");
+                                    parent_name.text("@" + data["parent_name"] + ":" + data["parent_content"]);
+                                    comment_obj.children().eq(2).before(parent_name);
+                                    parent_name.after(comment_obj.children().eq(2));
+
+
+                                }
+
+                                comment_obj.removeClass("hide");
+
+                                $(".comment_list").append(comment_obj);
+                                $("#comment_content").val("");
+
+
+                            }
+                            else {
+                                $(".comment_error").text("回复不能为空").css({"color": "red"});
+
+                            }
+
+                        }
+
+                    });
+
+                {% else %}
+                    location.href = "/login{{ request.path }}";
+                {% endif %}
+
+            })
+        })
+
+
+    </script>
+
+
+{% endblock %}

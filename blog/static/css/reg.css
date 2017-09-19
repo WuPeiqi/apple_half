@@ -1,0 +1,27 @@
+.container {
+    margin-top: 80px;
+}
+
+.valid_img {
+    width: 150px;
+    height: 40px;
+
+}
+
+.file_avatar {
+    position: relative;
+    width: 60px;
+    height: 60px;
+}
+
+.sol {
+    position: absolute;
+    top: 0;
+    left: 50px;
+    width: 60px;
+    height: 60px;
+}
+
+#file_choose {
+    opacity: 0;
+}

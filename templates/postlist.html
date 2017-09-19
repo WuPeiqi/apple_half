@@ -1,0 +1,167 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="x-ua-compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.css' %}">
+    <script src="{% static 'js/jquery-3.2.1.js' %}"></script>
+    <script src="{% static 'bootstrap/js/bootstrap.js' %}"></script>
+    <title>Title</title>
+    <style>
+
+        a{
+            text-decoration:none
+        }
+
+        img {
+            float: left;
+        }
+
+        ul li {
+            list-style: none;
+        }
+
+        tr th {
+            width: 10%;
+
+        }
+    </style>
+
+</head>
+<body>
+<nav class="navbar navbar-inverse">
+    <div class="container">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                    data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">Brand</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+                {% for type_choice in func %}
+                    <li><a href="#">{{ type_choice.1 }}</a></li>
+                {% endfor %}
+
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+                       aria-expanded="false">Dropdown <span class="caret"></span></a>
+
+                    <ul class="dropdown-menu">
+                        <li><a href="#">Action</a></li>
+                        <li><a href="#">Another action</a></li>
+                        <li><a href="#">Something else here</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="#">Separated link</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="#">One more separated link</a></li>
+
+                    </ul>
+                </li>
+            </ul>
+
+
+            <ul class="nav navbar-nav navbar-right">
+                {% if request.user.is_authenticated %}
+                    <li><a href="/u/{{ request.user }}">你好: {{ request.user }}</a></li>
+                    <li><a href="/log_out/">登出</a></li>
+                    <li><a href="/re_pwd/">修改密码</a></li>
+                    <li><a href="/index/">Help</a></li>
+
+                {% else %}
+                    <li><a href="/login/">登录</a></li>
+                    <li><a href="/reg/">注册</a></li>
+
+                {% endif %}
+
+
+            </ul>
+        </div><!-- /.navbar-collapse -->
+    </div><!-- /.container-fluid -->
+</nav>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-9 col-md-offset-1">
+            <div class="head">
+                <span class="float-left">
+                    <img height="60px" width="60px" src="{{ user_obj.avatar.url }}">
+                </span>
+                <span style="width: 10px"></span>
+                <span style="float: left">
+                    <ul>
+                        <li><span>{{ request.user }}</span></li>
+                        <li>
+                            <a href="">个人主页</a>
+                            |
+                            <a href="">我的博客</a>
+                        </li>
+                    </ul>
+                </span>
+            </div>
+            <div style="height: 80px"></div>
+            <div tabs_header>
+                <ul class="nav nav-tabs">
+                    <li role="presentation" class="active"><a href="#">文章管理</a></li>
+                    <li role="presentation"><a href="#">类别管理</a></li>
+                    <li role="presentation"><a href="#">评论管理</a></li>
+                    <li role="presentation"><a href="#">博客配置</a></li>
+                    <li role="presentation"><a href="#">博客栏目</a></li>
+                    <li role="presentation"><a href="#">草稿箱</a></li>
+                    <li role="presentation"><a href="#">回收站</a></li>
+                    <li role="presentation" style="float: right">
+{#                        <button type="button" class="btn btn-info "><a href="/addArticle/"><span>+写新文章</span></a></button>#}
+                        <a href="/addArticle/" class="btn btn-info" >+写新文章</a>
+                        <div style="height: 5px"></div>
+                    </li>
+
+                </ul>
+            </div>
+            <div style="height: 20px"></div>
+            <div class="article_filter" style="color: #999;font-size: 12px">
+                <span style="color: #999;font-size: 12px">随笔分类:</span> <select name="" id=""></select>
+                <span style="color: #999;font-size: 12px">标签分类:</span> <select name="" id=""></select>
+                <span style="color: #999;font-size: 12px">时间分类:</span> <select name="" id=""></select>
+            </div>
+            <div class="bs-example" data-example-id="hoverable-table">
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th style="width: 60%">标题</th>
+                        <th>点赞</th>
+                        <th>评论</th>
+                        <th style="width: 20%;text-align: center">操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for article in article_list %}
+                        <tr>
+                            <td><a href="/u/{{ request.user }}/{{ article.nid }}/">{{ article.title }}</a> <span style="color: #999;font-size: 12px">({{ article.create_time|date:"Y-m-d h:i" }})</span></td>
+                            <td>{{ article.up_count }}</td>
+                            <td>{{ article.comment_count }}</td>
+                            <td style="text-align: center"><a href="">编辑</a>&nbsp;|&nbsp;<a
+                                    href="">置顶</a>&nbsp;|&nbsp;<a href="">删除</a>&nbsp;|&nbsp;<a href="">分类</a></td>
+                        </tr>
+
+
+                    {% endfor %}
+
+                    </tbody>
+                </table>
+            </div>
+
+
+        </div>
+    </div>
+</div>
+</body>
+</html>
